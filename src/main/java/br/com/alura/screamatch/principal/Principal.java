@@ -9,10 +9,7 @@ import br.com.alura.screamatch.service.ConverterDados;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Principal {
@@ -52,12 +49,13 @@ public class Principal {
                 .flatMap(t -> t.episodio().stream())
                 .collect(Collectors.toList());
 
-        System.out.println("\n Top 5 episodios");
-        dadosEpisodios.stream().
-                filter(e -> !e.avaliacao().equalsIgnoreCase("N/A"))
-                .sorted(Comparator.comparing(DadosEpisodio::avaliacao).reversed())
-                .limit(5)
-                .forEach(System.out::println);
+//        System.out.println("\n Top 5 episodios");
+//        dadosEpisodios.stream().
+//                filter(e -> !e.avaliacao().equalsIgnoreCase("N/A"))
+//                .sorted(Comparator.comparing(DadosEpisodio::avaliacao).reversed())
+//                .limit(5)
+//                .forEach(System.out::println);
+
         List<Episodio> episodios = temporadasList.stream()
                 .flatMap(t -> t.episodio().stream()
                         .map(d -> new Episodio(t.numero(),d))
@@ -65,19 +63,48 @@ public class Principal {
 
         episodios.forEach(System.out::println);
 
-        System.out.println("A partir de que ano voce deseja ver os episodios");
-        var ano = in.nextInt();
-        in.nextLine();
+//        System.out.println("Digite o nome do episodio");
+//        var trechoTitulo = in.nextLine();
+//        Optional<Episodio> episodioBuscado = episodios.stream()
+//                .filter(e -> e.getTitulo().toUpperCase().contains(trechoTitulo.toUpperCase()))
+//                .findFirst();
+//
+//        if (episodioBuscado.isPresent()){
+//            System.out.println("Episodio encontrado");
+//            System.out.println("Temporada: " +  episodioBuscado.get().getTemporada() );
+//        }else{
+//            System.out.println("Episodio não encontrado");
+//        }
 
-        LocalDate databusca = LocalDate.of(ano, 1,1);
 
-        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        episodios.stream().filter(e ->e.getDataLancamento() != null && e.getDataLancamento().isAfter(databusca))
-                .forEach(e -> System.out.println(
-                        "Temporada: " + e.getTemporada() +
-                        " Episódio: "+ e.getTitulo() +
-                        " Data de lançamento: "+ e.getDataLancamento().format(formatador)
-                ));
+//        System.out.println("A partir de que ano voce deseja ver os episodios");
+//        var ano = in.nextInt();
+//        in.nextLine();
+//
+//        LocalDate databusca = LocalDate.of(ano, 1,1);
+//
+//        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//
+//        episodios.stream().filter(e ->e.getDataLancamento() != null && e.getDataLancamento().isAfter(databusca))
+//                .forEach(e -> System.out.println(
+//                        "Temporada: " + e.getTemporada() +
+//                        " Episódio: "+ e.getTitulo() +
+//                        " Data de lançamento: "+ e.getDataLancamento().format(formatador)
+//                ));
+
+          Map<Integer, Double> avaliacaoTemporada = episodios.stream()
+                  .filter(e -> e.getAvaliacao() > 0.0)
+                  .collect(Collectors.groupingBy(Episodio::getTemporada,
+                          Collectors.averagingDouble(Episodio::getAvaliacao)));
+        System.out.println( avaliacaoTemporada);
+
+        DoubleSummaryStatistics est = episodios.stream()
+                .filter(e -> e.getAvaliacao() > 0.0)
+                .collect(Collectors.summarizingDouble(Episodio::getAvaliacao));
+        System.out.println("Média: "+est.getAverage());
+        System.out.println("Melhor episódio: "+est.getMax());
+        System.out.println("Pior episódio: "+est.getMin());
+        System.out.println("Quantidade: "+est.getCount());
     }
 }
